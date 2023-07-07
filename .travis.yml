@@ -1,0 +1,26 @@
+sudo: required
+dist: trusty
+matrix:
+  include:
+    - language: python
+      python:
+          - 3.5
+      install: "pip3 install -r dronesym-python/requirements.txt"
+      script: pytest dronesym-python
+      
+    - language: node_js
+      node_js:
+        - "10"
+      before_script:
+        - cd dronesym-node
+        - npm install
+        - virtualenv  -p python3 ../flask_env
+        - source ../flask_env/bin/activate
+        
+      cache:
+        directories:
+          - "node_modules"
+      script:
+        - ((npm start;python3 ../dronesym-python/flask-api/src/main.py)&);(sleep 5 && npm test --timeout 10000 --exit)&
+      services:
+        - mongodb
